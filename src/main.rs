@@ -198,7 +198,10 @@ impl DelayCycles for BitDelay {
     }
 
     fn cpu_clock(&self) -> u32 {
-        125_000_000
+        // This function is used to calculate the number of cycles to wait in a SWD/JTAG clock
+        // cycle, so we don't actually have to return the real CPU frequency.
+        // cortex_m __delay divides by 2 and Cortex-M0+ needs 4 CPU cycles per delay loop iteration.
+        125_000_000 / 2
     }
 }
 
