@@ -1,6 +1,6 @@
 [target.'cfg(all(target_arch = "arm", target_os = "none"))']
-runner = "probe-rs run --chip RP2040 --preverify --probe 1366:0101:000000123456"
-#runner = "elf2uf2-rs -d"
+#runner = "probe-rs run --chip RP2040 --preverify"
+runner = "elf2uf2-rs -d"
 
 [build]
 target = "thumbv6m-none-eabi"        # Cortex-M0 and Cortex-M0+

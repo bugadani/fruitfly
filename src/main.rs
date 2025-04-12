@@ -198,7 +198,7 @@ impl DelayCycles for BitDelay {
     }
 
     fn cpu_clock(&self) -> u32 {
-        240_000_000
+        125_000_000
     }
 }
 
@@ -243,7 +243,6 @@ struct Leds<'a> {
 
 impl DapLeds for Leds<'_> {
     fn react_to_host_status(&mut self, host_status: dap::HostStatus) {
-        // TODO
         match host_status {
             dap::HostStatus::Connected(connected) => {
                 if connected {
