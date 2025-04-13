@@ -113,7 +113,7 @@ async fn main(_spawner: Spawner) {
     let mut dap = Dap::new(
         deps,
         Leds {
-            red: Output::new(p.PIN_2, gpio::Level::High),
+            _power: Output::new(p.PIN_2, gpio::Level::High),
             green: Output::new(p.PIN_15, gpio::Level::Low),
             yellow: Output::new(p.PIN_16, gpio::Level::Low),
         },
@@ -242,7 +242,7 @@ impl InputOutputPin for IoPin<'_> {
 }
 
 struct Leds<'a> {
-    red: Output<'a>,
+    _power: Output<'a>,
     green: Output<'a>,
     yellow: Output<'a>,
 }
@@ -271,23 +271,23 @@ impl DapLeds for Leds<'_> {
 struct NoSwo;
 
 impl Swo for NoSwo {
-    fn set_transport(&mut self, transport: dap_rs::swo::SwoTransport) {
+    fn set_transport(&mut self, _transport: dap_rs::swo::SwoTransport) {
         todo!()
     }
 
-    fn set_mode(&mut self, mode: dap_rs::swo::SwoMode) {
+    fn set_mode(&mut self, _mode: dap_rs::swo::SwoMode) {
         todo!()
     }
 
-    fn set_baudrate(&mut self, baudrate: u32) -> u32 {
+    fn set_baudrate(&mut self, _baudrate: u32) -> u32 {
         todo!()
     }
 
-    fn set_control(&mut self, control: dap_rs::swo::SwoControl) {
+    fn set_control(&mut self, _control: dap_rs::swo::SwoControl) {
         todo!()
     }
 
-    fn polling_data(&mut self, buf: &mut [u8]) -> u32 {
+    fn polling_data(&mut self, _buf: &mut [u8]) -> u32 {
         todo!()
     }
 
