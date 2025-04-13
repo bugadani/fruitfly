@@ -86,7 +86,7 @@ checksum = "5e764a1d40d510daf35e07be9eb06e75770908c27d411ee6c92109c9840eaaf7"
 [[package]]
 name = "bitbang-dap"
 version = "0.1.0"
-source = "git+https://github.com/bugadani/bitbang-dap?rev=8531eea65db66938aea1af3dab0a5aabe2193f68#8531eea65db66938aea1af3dab0a5aabe2193f68"
+source = "git+https://github.com/bugadani/bitbang-dap?rev=f26580a#f26580a70dd539b6b5151cf7efb89e84fc094549"
 dependencies = [
  "dap-rs",
  "defmt 1.0.1",
