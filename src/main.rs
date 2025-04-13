@@ -3,6 +3,7 @@
 
 use bitbang_dap::{BitbangAdapter, DelayCycles, InputOutputPin};
 use dap_rs::dap::{self, Dap, DapLeds, DapVersion, DelayNs};
+use dap_rs::jtag::TapConfig;
 use dap_rs::swo::Swo;
 use defmt::{todo, warn};
 use embassy_executor::Spawner;
@@ -19,7 +20,7 @@ use embassy_usb::{
     class::cdc_acm::State,
     driver::{Endpoint, EndpointError, EndpointIn, EndpointOut},
 };
-use static_cell::StaticCell;
+use static_cell::{ConstStaticCell, StaticCell};
 use {defmt_rtt as _, panic_probe as _};
 
 bind_interrupts!(struct Irqs {
@@ -99,6 +100,7 @@ async fn main(_spawner: Spawner) {
     let t_jtck_swclk = p.PIN_12;
     let t_jtdo = p.PIN_4;
 
+    static SCAN_CHAIN: ConstStaticCell<[TapConfig; 8]> = ConstStaticCell::new([TapConfig::INIT; 8]);
     let deps = BitbangAdapter::new(
         IoPin::new(t_nrst),
         IoPin::new(t_jtdi),
@@ -106,6 +108,7 @@ async fn main(_spawner: Spawner) {
         IoPin::new(t_jtck_swclk),
         IoPin::new(t_jtdo),
         BitDelay,
+        SCAN_CHAIN.take(),
     );
     let mut dap = Dap::new(
         deps,

@@ -86,10 +86,11 @@ checksum = "5e764a1d40d510daf35e07be9eb06e75770908c27d411ee6c92109c9840eaaf7"
 [[package]]
 name = "bitbang-dap"
 version = "0.1.0"
-source = "git+https://github.com/bugadani/bitbang-dap?rev=f26580a#f26580a70dd539b6b5151cf7efb89e84fc094549"
+source = "git+https://github.com/bugadani/bitbang-dap?rev=3892773#3892773deb8920a61b9039e4026d39ad1a4da3dd"
 dependencies = [
  "dap-rs",
  "defmt 1.0.1",
+ "static_cell",
 ]
 
 [[package]]
@@ -228,7 +229,7 @@ dependencies = [
 [[package]]
 name = "dap-rs"
 version = "0.2.0"
-source = "git+https://github.com/bugadani/dap-rs?rev=8a5049d528b866e65aa1c343b38e1d8776a3d626#8a5049d528b866e65aa1c343b38e1d8776a3d626"
+source = "git+https://github.com/bugadani/dap-rs?rev=0d2f47e#0d2f47e1ee481b4fba5347f707b29d7b36e12986"
 dependencies = [
  "bitflags 1.3.2",
  "defmt 0.3.100",

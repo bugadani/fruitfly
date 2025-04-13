@@ -11,8 +11,8 @@ embassy-time = { version = "0.4.0", git = "https://github.com/embassy-rs/embassy
 embassy-rp = { version = "0.4.0", git = "https://github.com/embassy-rs/embassy", features = ["defmt", "unstable-pac", "time-driver", "critical-section-impl", "rp2040"] }
 embassy-usb = { version = "0.4.0", git = "https://github.com/embassy-rs/embassy", features = ["defmt"] }
 
-dap-rs = { git = "https://github.com/bugadani/dap-rs", rev = "8a5049d528b866e65aa1c343b38e1d8776a3d626", features = ["defmt"] }
-bitbang-dap = { git = "https://github.com/bugadani/bitbang-dap", rev = "f26580a", features = ["defmt"] }
+dap-rs = { git = "https://github.com/bugadani/dap-rs", rev = "0d2f47e", features = ["defmt"] }
+bitbang-dap = { git = "https://github.com/bugadani/bitbang-dap", rev = "3892773", features = ["defmt"] }
 cortex-m = "0.7.7"
 defmt-rtt = "1.0.0"
 panic-probe = "1.0.0"
