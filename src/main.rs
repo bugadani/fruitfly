@@ -3,6 +3,7 @@
 
 use bitbang_dap::{BitbangAdapter, DelayCycles, InputOutputPin};
 use dap_rs::dap::{self, Dap, DapLeds, DapVersion, DelayNs};
+use dap_rs::jtag::TapConfig;
 use dap_rs::swo::Swo;
 use defmt::{todo, warn};
 use embassy_executor::Spawner;
@@ -19,7 +20,7 @@ use embassy_usb::{
     class::cdc_acm::State,
     driver::{Endpoint, EndpointError, EndpointIn, EndpointOut},
 };
-use static_cell::StaticCell;
+use static_cell::{ConstStaticCell, StaticCell};
 use {defmt_rtt as _, panic_probe as _};
 
 bind_interrupts!(struct Irqs {
@@ -30,13 +31,29 @@ bind_interrupts!(struct Irqs {
 async fn main(_spawner: Spawner) {
     let p = embassy_rp::init(Default::default());
 
+    // Configuration options:
+    // 1. Pinout
+    let t_nrst = p.PIN_29; // Disconnected
+    let t_jtdi = p.PIN_6; // UART yellow
+    let t_jtms_swdio = p.PIN_14; // DEBUG yellow
+    let t_jtck_swclk = p.PIN_12; // DEBUG orange
+    let t_jtdo = p.PIN_4; // UART orange
+    //let t_swo // Not supported yet
+
+    // 2. Max JTAG scan chain
+    const MAX_SCAN_CHAIN_LENGTH: usize = 8;
+
+    // 3. USB configuration
+    let manufacturer = "me";
+    let product = "Fruitfly debug probe CMSIS-DAP";
+
     // Create the driver, from the HAL.
     let driver = UsbDriver::new(p.USB, Irqs);
 
     // Create embassy-usb Config
     let mut config = Config::new(0xf569, 0x0001);
-    config.manufacturer = Some("me");
-    config.product = Some("Fruitfly debug probe CMSIS-DAP");
+    config.manufacturer = Some(manufacturer);
+    config.product = Some(product);
     config.serial_number = Some("12345678");
     config.max_power = 100;
     config.max_packet_size_0 = 64;
@@ -93,12 +110,9 @@ async fn main(_spawner: Spawner) {
     let usb_fut = usb.run();
 
     // Now create the CMSIS-DAP handler.
-    let t_nrst = p.PIN_29; // Disconnected
-    let t_jtdi = p.PIN_6;
-    let t_jtms_swdio = p.PIN_14;
-    let t_jtck_swclk = p.PIN_12;
-    let t_jtdo = p.PIN_4;
 
+    static SCAN_CHAIN: ConstStaticCell<[TapConfig; MAX_SCAN_CHAIN_LENGTH]> =
+        ConstStaticCell::new([TapConfig::INIT; MAX_SCAN_CHAIN_LENGTH]);
     let deps = BitbangAdapter::new(
         IoPin::new(t_nrst),
         IoPin::new(t_jtdi),
@@ -106,17 +120,18 @@ async fn main(_spawner: Spawner) {
         IoPin::new(t_jtck_swclk),
         IoPin::new(t_jtdo),
         BitDelay,
+        SCAN_CHAIN.take(),
     );
     let mut dap = Dap::new(
         deps,
         Leds {
-            red: Output::new(p.PIN_2, gpio::Level::High),
+            _power: Output::new(p.PIN_2, gpio::Level::High),
             green: Output::new(p.PIN_15, gpio::Level::Low),
             yellow: Output::new(p.PIN_16, gpio::Level::Low),
         },
         BitDelay,
         None::<NoSwo>,
-        "Fruitfly CMSIS-DAP",
+        concat!("2.1.0, Adaptor version ", env!("CARGO_PKG_VERSION")),
     );
 
     // Do stuff with the class!
@@ -239,7 +254,7 @@ impl InputOutputPin for IoPin<'_> {
 }
 
 struct Leds<'a> {
-    red: Output<'a>,
+    _power: Output<'a>,
     green: Output<'a>,
     yellow: Output<'a>,
 }
@@ -268,23 +283,23 @@ impl DapLeds for Leds<'_> {
 struct NoSwo;
 
 impl Swo for NoSwo {
-    fn set_transport(&mut self, transport: dap_rs::swo::SwoTransport) {
+    fn set_transport(&mut self, _transport: dap_rs::swo::SwoTransport) {
         todo!()
     }
 
-    fn set_mode(&mut self, mode: dap_rs::swo::SwoMode) {
+    fn set_mode(&mut self, _mode: dap_rs::swo::SwoMode) {
         todo!()
     }
 
-    fn set_baudrate(&mut self, baudrate: u32) -> u32 {
+    fn set_baudrate(&mut self, _baudrate: u32) -> u32 {
         todo!()
     }
 
-    fn set_control(&mut self, control: dap_rs::swo::SwoControl) {
+    fn set_control(&mut self, _control: dap_rs::swo::SwoControl) {
         todo!()
     }
 
-    fn polling_data(&mut self, buf: &mut [u8]) -> u32 {
+    fn polling_data(&mut self, _buf: &mut [u8]) -> u32 {
         todo!()
     }
 
