@@ -31,13 +31,29 @@ bind_interrupts!(struct Irqs {
 async fn main(_spawner: Spawner) {
     let p = embassy_rp::init(Default::default());
 
+    // Configuration options:
+    // 1. Pinout
+    let t_nrst = p.PIN_29; // Disconnected
+    let t_jtdi = p.PIN_6; // UART yellow
+    let t_jtms_swdio = p.PIN_14; // DEBUG yellow
+    let t_jtck_swclk = p.PIN_12; // DEBUG orange
+    let t_jtdo = p.PIN_4; // UART orange
+    //let t_swo // Not supported yet
+
+    // 2. Max JTAG scan chain
+    const MAX_SCAN_CHAIN_LENGTH: usize = 8;
+
+    // 3. USB configuration
+    let manufacturer = "me";
+    let product = "Fruitfly debug probe CMSIS-DAP";
+
     // Create the driver, from the HAL.
     let driver = UsbDriver::new(p.USB, Irqs);
 
     // Create embassy-usb Config
     let mut config = Config::new(0xf569, 0x0001);
-    config.manufacturer = Some("me");
-    config.product = Some("Fruitfly debug probe CMSIS-DAP");
+    config.manufacturer = Some(manufacturer);
+    config.product = Some(product);
     config.serial_number = Some("12345678");
     config.max_power = 100;
     config.max_packet_size_0 = 64;
@@ -94,13 +110,9 @@ async fn main(_spawner: Spawner) {
     let usb_fut = usb.run();
 
     // Now create the CMSIS-DAP handler.
-    let t_nrst = p.PIN_29; // Disconnected
-    let t_jtdi = p.PIN_6;
-    let t_jtms_swdio = p.PIN_14;
-    let t_jtck_swclk = p.PIN_12;
-    let t_jtdo = p.PIN_4;
 
-    static SCAN_CHAIN: ConstStaticCell<[TapConfig; 8]> = ConstStaticCell::new([TapConfig::INIT; 8]);
+    static SCAN_CHAIN: ConstStaticCell<[TapConfig; MAX_SCAN_CHAIN_LENGTH]> =
+        ConstStaticCell::new([TapConfig::INIT; MAX_SCAN_CHAIN_LENGTH]);
     let deps = BitbangAdapter::new(
         IoPin::new(t_nrst),
         IoPin::new(t_jtdi),
@@ -119,7 +131,7 @@ async fn main(_spawner: Spawner) {
         },
         BitDelay,
         None::<NoSwo>,
-        "Fruitfly CMSIS-DAP",
+        concat!("2.1.0, Adaptor version ", env!("CARGO_PKG_VERSION")),
     );
 
     // Do stuff with the class!
