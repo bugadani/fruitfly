@@ -6,10 +6,11 @@ use bitbang_dap::{BitbangAdapter, DelayCycles, InputOutputPin};
 use dap_rs::dap::{self, Dap, DapLeds, DapVersion, DelayNs};
 use dap_rs::jtag::TapConfig;
 use dap_rs::swo::Swo;
-use defmt::{todo, warn};
+use defmt::{todo, unwrap, warn};
 use embassy_executor::Spawner;
 use embassy_futures::join::join;
-use embassy_rp::gpio::{self, Flex, Output, Pin};
+use embassy_rp::flash::Flash;
+use embassy_rp::gpio::{Flex, Level, Output, Pin};
 use embassy_rp::peripherals::USB;
 use embassy_rp::usb::{Driver as UsbDriver, InterruptHandler};
 use embassy_rp::{Peri, bind_interrupts};
@@ -17,6 +18,7 @@ use embassy_usb::class::cdc_acm::CdcAcmClass;
 use embassy_usb::class::cdc_acm::State;
 use embassy_usb::msos::windows_version;
 use embassy_usb::{Builder, Config};
+use heapless::String;
 use static_cell::{ConstStaticCell, StaticCell};
 
 use {defmt_rtt as _, panic_probe as _};
@@ -50,11 +52,33 @@ async fn main(_spawner: Spawner) {
     // Create the driver, from the HAL.
     let driver = UsbDriver::new(p.USB, Irqs);
 
+    // Get unique id from flash
+    let mut flash = Flash::<_, _, 0>::new_blocking(p.FLASH);
+
+    let mut uid = [0; 8];
+    flash.blocking_unique_id(&mut uid).unwrap();
+
+    static SERIAL: ConstStaticCell<String<16>> = ConstStaticCell::new(String::<16>::new());
+    let serial = SERIAL.take();
+    for b in uid {
+        let lower = b & 0x0F;
+        let upper = (b >> 4) & 0x0F;
+        fn hex(nibble: u8) -> char {
+            if nibble < 10 {
+                (b'0' + nibble) as char
+            } else {
+                (b'A' + nibble - 10) as char
+            }
+        }
+        unwrap!(serial.push(hex(upper)));
+        unwrap!(serial.push(hex(lower)));
+    }
+
     // Create embassy-usb Config
-    let mut config = Config::new(0xf569, 0x0001);
+    let mut config = Config::new(0xc0de, 0xcafe);
     config.manufacturer = Some(MANUFACTURER);
     config.product = Some(PRODUCT);
-    config.serial_number = Some("12345678");
+    config.serial_number = Some(serial);
     config.max_power = 100;
     config.max_packet_size_0 = 64;
     config.device_class = 0xEF;
@@ -111,9 +135,9 @@ async fn main(_spawner: Spawner) {
     let mut dap = Dap::new(
         deps,
         Leds {
-            _power: Output::new(p.PIN_2, gpio::Level::High),
-            green: Output::new(p.PIN_15, gpio::Level::Low),
-            yellow: Output::new(p.PIN_16, gpio::Level::Low),
+            _power: Output::new(p.PIN_2, Level::High),
+            green: Output::new(p.PIN_15, Level::Low),
+            yellow: Output::new(p.PIN_16, Level::Low),
         },
         BitDelay,
         None::<NoSwo>,
@@ -209,20 +233,8 @@ struct Leds<'a> {
 impl DapLeds for Leds<'_> {
     fn react_to_host_status(&mut self, host_status: dap::HostStatus) {
         match host_status {
-            dap::HostStatus::Connected(connected) => {
-                if connected {
-                    self.green.set_high();
-                } else {
-                    self.green.set_low();
-                }
-            }
-            dap::HostStatus::Running(running) => {
-                if running {
-                    self.yellow.set_high();
-                } else {
-                    self.yellow.set_low();
-                }
-            }
+            dap::HostStatus::Connected(c) => self.green.set_level(Level::from(c)),
+            dap::HostStatus::Running(r) => self.yellow.set_level(Level::from(r)),
         }
     }
 }

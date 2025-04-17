@@ -21,3 +21,4 @@ defmt = "1.0.1"
 cortex-m-rt = "0.7.5"
 static_cell = "2.1.0"
 portable-atomic = { version = "1.11", features = ["critical-section"] }
+heapless = "0.8.0"

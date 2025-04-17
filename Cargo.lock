@@ -661,6 +661,7 @@ dependencies = [
  "embassy-sync",
  "embassy-time",
  "embassy-usb",
+ "heapless",
  "panic-probe",
  "portable-atomic",
  "static_cell",
