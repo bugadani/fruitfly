@@ -1,7 +1,6 @@
 #![no_std]
 #![no_main]
 
-use crate::usb_driver::{CmsisDapV2Class, CmsisDapV2State};
 use bitbang_dap::{BitbangAdapter, DelayCycles, InputOutputPin};
 use dap_rs::dap::{self, Dap, DapLeds, DapVersion, DelayNs};
 use dap_rs::jtag::TapConfig;
@@ -16,6 +15,7 @@ use embassy_rp::usb::{Driver as UsbDriver, InterruptHandler};
 use embassy_rp::{Peri, bind_interrupts};
 use embassy_usb::class::cdc_acm::CdcAcmClass;
 use embassy_usb::class::cdc_acm::State;
+use embassy_usb::class::cmsis_dap_v2::{CmsisDapV2Class, State as CmsisDapV2State};
 use embassy_usb::msos::windows_version;
 use embassy_usb::{Builder, Config};
 use heapless::String;
@@ -26,8 +26,6 @@ use {defmt_rtt as _, panic_probe as _};
 bind_interrupts!(struct Irqs {
     USBCTRL_IRQ => InterruptHandler<USB>;
 });
-
-mod usb_driver;
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
@@ -106,7 +104,7 @@ async fn main(_spawner: Spawner) {
     // DAP - Custom Class 0
     static DAP_STATE: ConstStaticCell<CmsisDapV2State> =
         ConstStaticCell::new(CmsisDapV2State::new());
-    let mut dap_class = CmsisDapV2Class::new(&mut builder, DAP_STATE.take(), 64);
+    let mut dap_class = CmsisDapV2Class::new(&mut builder, DAP_STATE.take(), 64, true);
 
     // CDC - dummy class to get things working for now. Windows needs more than one interface
     // to load usbccgp.sys, which is necessary for nusb to be able to list interfaces.
