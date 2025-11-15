@@ -2,8 +2,8 @@ Fruitfly
 ========
 
 A simple alternative debug probe firmware for the RPi debugprobe. The goal of this is to provide an
-alternative to the PIO-driven debugprobe firmware which may have too string timing for certain
-target devices.
+alternative to the PIO-driven debugprobe firmware which may have [too strict](https://github.com/raspberrypi/debugprobe/issues/172)
+timing for certain target devices.
 
 The probe implements both the SWD and JTAG interfaces. SWD is available using the DEBUG port as
 usual, while JTAG uses both DEBUG and UART with the following pin assignment:
