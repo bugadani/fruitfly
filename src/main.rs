@@ -1,11 +1,11 @@
 #![no_std]
 #![no_main]
 
-use bitbang_dap::{BitbangAdapter, DelayCycles, InputOutputPin};
 use dap_rs::dap::{self, Dap, DapLeds, DapVersion, DelayNs};
+use dap_rs::driver::bitbang::{BitbangAdapter, DelayCycles, InputOutputPin};
 use dap_rs::jtag::TapConfig;
-use dap_rs::swo::Swo;
-use defmt::{todo, unwrap, warn};
+use dap_rs::swo::NoSwo;
+use defmt::{unwrap, warn};
 use embassy_executor::Spawner;
 use embassy_futures::join::join;
 use embassy_rp::flash::Flash;
@@ -138,7 +138,7 @@ async fn main(_spawner: Spawner) {
             yellow: Output::new(p.PIN_16, Level::Low),
         },
         BitDelay,
-        None::<NoSwo>,
+        NoSwo,
         concat!("2.1.0, Adaptor version ", env!("CARGO_PKG_VERSION")),
     );
 
@@ -234,53 +234,5 @@ impl DapLeds for Leds<'_> {
             dap::HostStatus::Connected(c) => self.green.set_level(Level::from(c)),
             dap::HostStatus::Running(r) => self.yellow.set_level(Level::from(r)),
         }
-    }
-}
-
-struct NoSwo;
-
-impl Swo for NoSwo {
-    fn set_transport(&mut self, _transport: dap_rs::swo::SwoTransport) {
-        todo!()
-    }
-
-    fn set_mode(&mut self, _mode: dap_rs::swo::SwoMode) {
-        todo!()
-    }
-
-    fn set_baudrate(&mut self, _baudrate: u32) -> u32 {
-        todo!()
-    }
-
-    fn set_control(&mut self, _control: dap_rs::swo::SwoControl) {
-        todo!()
-    }
-
-    fn polling_data(&mut self, _buf: &mut [u8]) -> u32 {
-        todo!()
-    }
-
-    fn streaming_data(&mut self) {
-        todo!()
-    }
-
-    fn is_active(&self) -> bool {
-        todo!()
-    }
-
-    fn bytes_available(&self) -> u32 {
-        todo!()
-    }
-
-    fn buffer_size(&self) -> u32 {
-        todo!()
-    }
-
-    fn support(&self) -> dap_rs::swo::SwoSupport {
-        todo!()
-    }
-
-    fn status(&mut self) -> dap_rs::swo::SwoStatus {
-        todo!()
     }
 }

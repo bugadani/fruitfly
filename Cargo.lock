@@ -84,16 +84,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5e764a1d40d510daf35e07be9eb06e75770908c27d411ee6c92109c9840eaaf7"
 
 [[package]]
-name = "bitbang-dap"
-version = "0.1.0"
-source = "git+https://github.com/bugadani/bitbang-dap?rev=138717a#138717a5a5f69fda359b6b9ac7c1f5ca23bf4f49"
-dependencies = [
- "dap-rs",
- "defmt 1.0.1",
- "static_cell",
-]
-
-[[package]]
 name = "bitfield"
 version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -229,7 +219,7 @@ dependencies = [
 [[package]]
 name = "dap-rs"
 version = "0.2.0"
-source = "git+https://github.com/bugadani/dap-rs?rev=e9aa3c3#e9aa3c374852a533a001a3d04eebaede44cbf9ff"
+source = "git+https://github.com/bugadani/dap-rs?rev=e5669b0#e5669b02c2df3a12b37467b63723eb7cace3f5b7"
 dependencies = [
  "bitflags 1.3.2",
  "defmt 0.3.100",
@@ -649,7 +639,6 @@ checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 name = "fruitfly"
 version = "0.1.0"
 dependencies = [
- "bitbang-dap",
  "cortex-m",
  "cortex-m-rt",
  "dap-rs",
